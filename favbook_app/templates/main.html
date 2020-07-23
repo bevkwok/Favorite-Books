@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Main Page</title>
+</head>
+<body>
+    <div id="header">
+        <h1>Welcome, {{ user.first_name }}</h1>
+        <form method="POST" action="/logout">
+            {% csrf_token %}
+            <a href="/logout">Log out</a>
+        </form>
+    </div>
+    <hr>
+    <div id="main">
+        <div id="add_book">
+            <h2>Add a Favorite Book</h2>
+            <ul class="messages">    
+                {% for message in messages %}
+                    {% if "book" in message.tags %}    
+                        <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>  
+                    {% endif %}
+                {% endfor %}
+            </ul>
+            <form action="/add_book" method="post">
+                {% csrf_token %}
+                <p>Title : <input type="text" name="title"></p>
+                <p>Description : <input type="text" name="desc"></p>
+                <button type="submit">Add</button>
+            </form>
+        </div>
+        <div id="all_book">
+            <h2>All Books</h2>
+            {% for b in user.favbook.all %}
+            <ul>
+                <li>
+                    <a href="/books/{{ b.id }}">{{ b.title }}</a>
+                    <p>(added by {{ b.uploaded_by.first_name }})</p>
+                    <p>{{ b.desc }}</p>
+                </li>
+            </ul>
+            {% endfor %}
+
+            <h3>Unfavorite Book</h3>
+            {% for b in book %}
+            <ul>
+                <li>
+                    <a href="/books/{{ b.id }}">{{ b.title }}</a>
+                    <p>(added by {{ b.uploaded_by.first_name }})</p>
+                    <p>{{ b.desc }}</p>
+                    <form action="/add_fav" method="POST">
+                        {% csrf_token %}
+                        <button type="submit">Add to Favorite</button>
+                        <input type="hidden" name="hidden_fav" value={{b.id}}>
+                    </form>
+                </li>
+            </ul>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

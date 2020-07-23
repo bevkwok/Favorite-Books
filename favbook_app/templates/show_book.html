@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show Book</title>
+</head>
+<body>
+    <div id="header">
+        <h1>Welcome, {{ user.first_name }}</h1>
+        <form method="POST" action="/logout">
+            {% csrf_token %}
+            <a href="/logout">Log out</a>
+        </form>
+    </div>
+    <hr>
+    <div>
+        {% if get_book in user.book_upload.all %}
+        <form action="/edit_book" method="POST">
+            {% csrf_token %}
+            <input type="text" name="title" id="title" value="{{ get_book.title }}">
+            <p>Added by: {{ get_book.uploaded_by.first_name  }}</p>
+            <p>Added on: {{ get_book.created_at }}</p>
+            <p>Last Update on: {{ get_book.updated_at }}</p>
+            <input type="text" name="desc" id="desc" value="{{ get_book.desc }}">
+            <br>
+            <button type="submit">Update</button>
+            <form action="/del_book" method="POST">
+                <input type="hidden" name="hidden_book_id" value="{{get_book.id}}">
+                <button type="submit">Delete</button>
+            </form>
+            <input type="hidden" name="hidden_book_id" value={{get_book.id}}>
+        </form>
+        {% else %}
+        <h1>{{ get_book.title }}</h1>
+        <p>Added by: {{ get_book.uploaded_by.first_name  }}</p>
+        <p>Added on: {{ get_book.created_at }}</p>
+        <p>Last Update on: {{ get_book.updated_at }}</p>
+        <p>Description: {{ get_book.desc }}</p>
+        {% endif %}
+
+    </div>
+    <div>
+        <h4>Users Who Like This Book:</h4>
+        {% for u in get_book.fav.all %}
+        <ul>
+            {% if u.id is user.id %}
+            <li>
+                {{ u.first_name }} {{ u.last_name }} 
+                <form action="/unfav" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="hidden_book_id" value="{{get_book.id}}">
+                    <button type="submit">Un-Favorite</button>
+                </form>
+            </li>
+            {% else %}
+            <li>
+                {{ u.first_name }} {{ u.last_name }} 
+            </li>
+            {% endif %}
+        </ul>
+        {% endfor %}
+    </div>
+    
+    {% if user not in get_book.fav.all %}
+    <hr>
+    <form action="/fav" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="hidden_book_id" value="{{get_book.id}}">
+        <button type="submit">Add Book to Favorite</button>
+    </form>
+    {% endif %}
+</body>
+</html>
